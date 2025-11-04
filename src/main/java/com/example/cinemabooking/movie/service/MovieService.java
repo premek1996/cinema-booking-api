@@ -1,0 +1,59 @@
+package com.example.cinemabooking.movie.service;
+
+import com.example.cinemabooking.movie.dto.CreateMovieRequest;
+import com.example.cinemabooking.movie.dto.MovieResponse;
+import com.example.cinemabooking.movie.entity.Movie;
+import com.example.cinemabooking.movie.repository.MovieRepository;
+import com.example.cinemabooking.movie.service.exception.MovieAlreadyExistsException;
+import com.example.cinemabooking.movie.service.exception.MovieNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class MovieService {
+
+    private final MovieRepository movieRepository;
+
+    @Transactional(readOnly = true)
+    public List<MovieResponse> getAllMovies() {
+        return movieRepository.findAll()
+                .stream()
+                .map(MovieResponse::of)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public MovieResponse getMovieById(Long id) {
+        Movie movie = getMovieOrThrow(id);
+        return MovieResponse.of(movie);
+    }
+
+    private Movie getMovieOrThrow(Long id) {
+        return movieRepository.findById(id)
+                .orElseThrow(() -> new MovieNotFoundException(id));
+    }
+
+    @Transactional
+    public MovieResponse createMovie(CreateMovieRequest createMovieRequest) {
+        validateUniqueTitle(createMovieRequest.getTitle());
+        Movie movie = createMovieRequest.toMovie();
+        return MovieResponse.of(movieRepository.save(movie));
+    }
+
+    private void validateUniqueTitle(String title) {
+        if (movieRepository.findByTitle(title).isPresent()) {
+            throw new MovieAlreadyExistsException(title);
+        }
+    }
+
+    @Transactional
+    public void deleteMovie(Long id) {
+        Movie movie = getMovieOrThrow(id);
+        movieRepository.delete(movie);
+    }
+
+}
