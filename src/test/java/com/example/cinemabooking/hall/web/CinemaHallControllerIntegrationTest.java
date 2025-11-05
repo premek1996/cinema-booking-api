@@ -256,6 +256,7 @@ class CinemaHallControllerIntegrationTest {
     @DisplayName("should return 404 when deleting non-existent cinema hall")
     void shouldReturn404WhenDeletingNonExistentCinemaHall() throws Exception {
         // given – no cinema halls in DB
+        // when
         mockMvc.perform(delete("/api/halls/99"))
                 // then
                 .andExpect(status().isNotFound());
