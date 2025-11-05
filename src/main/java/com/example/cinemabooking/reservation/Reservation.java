@@ -1,6 +1,6 @@
 package com.example.cinemabooking.reservation;
 
-import com.example.cinemabooking.showtime.ShowTime;
+import com.example.cinemabooking.showtime.entity.ShowTime;
 import com.example.cinemabooking.user.User;
 import jakarta.persistence.*;
 import lombok.*;

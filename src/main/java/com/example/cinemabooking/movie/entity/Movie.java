@@ -1,6 +1,6 @@
 package com.example.cinemabooking.movie.entity;
 
-import com.example.cinemabooking.showtime.ShowTime;
+import com.example.cinemabooking.showtime.entity.ShowTime;
 import jakarta.persistence.*;
 import lombok.*;
 

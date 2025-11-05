@@ -1,4 +1,4 @@
-package com.example.cinemabooking.showtime;
+package com.example.cinemabooking.showtime.entity;
 
 import com.example.cinemabooking.hall.entity.CinemaHall;
 import com.example.cinemabooking.movie.entity.Movie;

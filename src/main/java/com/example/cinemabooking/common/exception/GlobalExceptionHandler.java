@@ -4,6 +4,7 @@ import com.example.cinemabooking.hall.service.exception.CinemaHallAlreadyExistsE
 import com.example.cinemabooking.hall.service.exception.CinemaHallNotFoundException;
 import com.example.cinemabooking.movie.service.exception.MovieAlreadyExistsException;
 import com.example.cinemabooking.movie.service.exception.MovieNotFoundException;
+import com.example.cinemabooking.showtime.service.exception.ShowTimeNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,6 +22,7 @@ class GlobalExceptionHandler {
     private static final Map<Class<? extends Throwable>, HttpStatus> EXCEPTION_STATUS_MAP = Map.ofEntries(
             Map.entry(MovieNotFoundException.class, HttpStatus.NOT_FOUND),
             Map.entry(CinemaHallNotFoundException.class, HttpStatus.NOT_FOUND),
+            Map.entry(ShowTimeNotFoundException.class, HttpStatus.NOT_FOUND),
             Map.entry(MovieAlreadyExistsException.class, HttpStatus.CONFLICT),
             Map.entry(CinemaHallAlreadyExistsException.class, HttpStatus.CONFLICT)
     );
@@ -28,6 +30,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler({
             MovieNotFoundException.class,
             CinemaHallNotFoundException.class,
+            ShowTimeNotFoundException.class,
             MovieAlreadyExistsException.class,
             CinemaHallAlreadyExistsException.class
     })
