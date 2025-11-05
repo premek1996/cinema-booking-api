@@ -24,7 +24,7 @@ public class Movie {
     @EqualsAndHashCode.Include
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String title;
 
     @Column(length = 2000, nullable = false)
