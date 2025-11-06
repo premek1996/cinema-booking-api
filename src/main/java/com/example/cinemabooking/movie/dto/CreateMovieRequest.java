@@ -27,6 +27,7 @@ public class CreateMovieRequest {
     @Min(1)
     int durationMinutes;
 
+    @NotNull
     @PastOrPresent
     LocalDate releaseDate;
 

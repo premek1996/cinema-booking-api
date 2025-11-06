@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -46,24 +45,20 @@ public class CinemaHallService {
         if (cinemaHallRepository.findByName(cinemaHall.getName()).isPresent()) {
             throw new CinemaHallAlreadyExistsException(cinemaHall.getName());
         }
-        List<Seat> seats = generateSeatsForCinemaHall(cinemaHall);
-        cinemaHall.setSeats(seats);
+        createSeats(cinemaHall);
         return CinemaHallResponse.of(cinemaHallRepository.save(cinemaHall));
     }
 
-    private List<Seat> generateSeatsForCinemaHall(CinemaHall cinemaHall) {
-        List<Seat> seats = new ArrayList<>();
+    private void createSeats(CinemaHall cinemaHall) {
         for (int row = 1; row <= cinemaHall.getRows(); row++) {
             for (int seatNumber = 1; seatNumber <= cinemaHall.getSeatsPerRow(); seatNumber++) {
                 Seat seat = Seat.builder()
                         .rowNumber(row)
                         .seatNumber(seatNumber)
-                        .cinemaHall(cinemaHall)
                         .build();
-                seats.add(seat);
+                cinemaHall.addSeat(seat);
             }
         }
-        return seats;
     }
 
     @Transactional
@@ -87,8 +82,7 @@ public class CinemaHallService {
         cinemaHall.setRows(request.getRows());
         cinemaHall.setSeatsPerRow(request.getSeatsPerRow());
         cinemaHall.getSeats().clear();
-        List<Seat> seats = generateSeatsForCinemaHall(cinemaHall);
-        cinemaHall.getSeats().addAll(seats);
+        createSeats(cinemaHall);
     }
 
     @Transactional

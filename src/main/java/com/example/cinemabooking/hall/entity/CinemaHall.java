@@ -40,4 +40,9 @@ public class CinemaHall {
     @Builder.Default
     private List<ShowTime> showTimes = new ArrayList<>();
 
+    public void addSeat(Seat seat) {
+        seats.add(seat);
+        seat.setCinemaHall(this);
+    }
+
 }
