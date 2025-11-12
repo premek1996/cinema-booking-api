@@ -46,9 +46,9 @@ public class CinemaHall {
         seat.setCinemaHall(this);
     }
 
-    public boolean isOccupiedDuring(LocalDateTime startTime, LocalDateTime endTime) {
+    public boolean isOccupiedDuring(LocalDateTime startTime, LocalDateTime endTime, Long currentShowTimeId) {
         return showTimes.stream()
-                .anyMatch(showTime -> showTime.overlapsWith(startTime, endTime));
+                .anyMatch(showTime -> !showTime.getId().equals(currentShowTimeId) && showTime.overlapsWith(startTime, endTime));
     }
 
 }
