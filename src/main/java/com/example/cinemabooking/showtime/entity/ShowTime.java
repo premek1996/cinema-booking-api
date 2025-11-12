@@ -46,4 +46,8 @@ public class ShowTime {
     @Builder.Default
     private List<Reservation> reservations = new ArrayList<>();
 
+    public boolean overlapsWith(LocalDateTime startTime, LocalDateTime endTime) {
+        return this.startTime.isBefore(endTime) && this.endTime.isAfter(startTime);
+    }
+
 }

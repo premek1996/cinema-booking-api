@@ -4,6 +4,7 @@ import com.example.cinemabooking.showtime.entity.ShowTime;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +44,11 @@ public class CinemaHall {
     public void addSeat(Seat seat) {
         seats.add(seat);
         seat.setCinemaHall(this);
+    }
+
+    public boolean isOccupiedDuring(LocalDateTime startTime, LocalDateTime endTime) {
+        return showTimes.stream()
+                .anyMatch(showTime -> showTime.overlapsWith(startTime, endTime));
     }
 
 }

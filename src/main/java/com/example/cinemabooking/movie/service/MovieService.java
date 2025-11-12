@@ -32,7 +32,8 @@ public class MovieService {
         return MovieResponse.of(movie);
     }
 
-    private Movie getMovieOrThrow(Long id) {
+    @Transactional(readOnly = true)
+    public Movie getMovieOrThrow(Long id) {
         return movieRepository.findById(id)
                 .orElseThrow(() -> new MovieNotFoundException(id));
     }

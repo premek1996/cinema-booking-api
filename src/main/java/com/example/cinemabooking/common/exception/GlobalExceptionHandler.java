@@ -4,6 +4,8 @@ import com.example.cinemabooking.hall.service.exception.CinemaHallAlreadyExistsE
 import com.example.cinemabooking.hall.service.exception.CinemaHallNotFoundException;
 import com.example.cinemabooking.movie.service.exception.MovieAlreadyExistsException;
 import com.example.cinemabooking.movie.service.exception.MovieNotFoundException;
+import com.example.cinemabooking.showtime.service.exception.ShowTimeConflictException;
+import com.example.cinemabooking.showtime.service.exception.ShowTimeInvalidTimeRangeException;
 import com.example.cinemabooking.showtime.service.exception.ShowTimeNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +26,9 @@ class GlobalExceptionHandler {
             Map.entry(CinemaHallNotFoundException.class, HttpStatus.NOT_FOUND),
             Map.entry(ShowTimeNotFoundException.class, HttpStatus.NOT_FOUND),
             Map.entry(MovieAlreadyExistsException.class, HttpStatus.CONFLICT),
-            Map.entry(CinemaHallAlreadyExistsException.class, HttpStatus.CONFLICT)
+            Map.entry(CinemaHallAlreadyExistsException.class, HttpStatus.CONFLICT),
+            Map.entry(ShowTimeInvalidTimeRangeException.class, HttpStatus.BAD_REQUEST),
+            Map.entry(ShowTimeConflictException.class, HttpStatus.CONFLICT)
     );
 
     @ExceptionHandler({
@@ -32,7 +36,9 @@ class GlobalExceptionHandler {
             CinemaHallNotFoundException.class,
             ShowTimeNotFoundException.class,
             MovieAlreadyExistsException.class,
-            CinemaHallAlreadyExistsException.class
+            CinemaHallAlreadyExistsException.class,
+            ShowTimeInvalidTimeRangeException.class,
+            ShowTimeConflictException.class
     })
     @ResponseBody
     ResponseEntity<ApiExceptionResponse> handleKnownExceptions(RuntimeException e) {
