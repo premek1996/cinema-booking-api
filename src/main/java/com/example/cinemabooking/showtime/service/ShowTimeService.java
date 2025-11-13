@@ -76,6 +76,18 @@ public class ShowTimeService {
         validateNoTimeConflict(cinemaHall, startTime, endTime, currentShowTimeId);
     }
 
+    private void validateEndTimeAfterStartTime(LocalDateTime startTime, LocalDateTime endTime) {
+        if (!endTime.isAfter(startTime)) {
+            throw new ShowTimeInvalidTimeRangeException(startTime, endTime);
+        }
+    }
+
+    private void validateNoTimeConflict(CinemaHall cinemaHall, LocalDateTime startTime, LocalDateTime endTime, Long currentShowTimeId) {
+        if (cinemaHall.isOccupiedDuring(startTime, endTime, currentShowTimeId)) {
+            throw new ShowTimeConflictException(cinemaHall.getName(), startTime, endTime);
+        }
+    }
+
     @Transactional
     public ShowTimeResponse updateShowTime(Long id, UpdateShowTimeRequest request) {
         ShowTime showTime = getShowTimeOrThrow(id);
@@ -92,18 +104,6 @@ public class ShowTimeService {
         showTime.setStartTime(request.getStartTime());
         showTime.setEndTime(request.getEndTime());
         showTime.setPrice(request.getPrice());
-    }
-
-    private void validateEndTimeAfterStartTime(LocalDateTime startTime, LocalDateTime endTime) {
-        if (!endTime.isAfter(startTime)) {
-            throw new ShowTimeInvalidTimeRangeException(startTime, endTime);
-        }
-    }
-
-    private void validateNoTimeConflict(CinemaHall cinemaHall, LocalDateTime startTime, LocalDateTime endTime, Long currentShowTimeId) {
-        if (cinemaHall.isOccupiedDuring(startTime, endTime, currentShowTimeId)) {
-            throw new ShowTimeConflictException(cinemaHall.getName(), startTime, endTime);
-        }
     }
 
     @Transactional
