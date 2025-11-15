@@ -5,6 +5,7 @@ import com.example.cinemabooking.hall.repository.CinemaHallRepository;
 import com.example.cinemabooking.movie.entity.AgeRating;
 import com.example.cinemabooking.movie.entity.Movie;
 import com.example.cinemabooking.movie.repository.MovieRepository;
+import com.example.cinemabooking.showtime.dto.CreateShowTimeRequest;
 import com.example.cinemabooking.showtime.entity.ShowTime;
 import com.example.cinemabooking.showtime.repository.ShowTimeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,12 +15,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -42,8 +49,8 @@ class ShowTimeControllerIntegrationTest {
     private CinemaHallRepository cinemaHallRepository;
 
     private Movie movie;
-    private CinemaHall hall;
-    private ShowTime showtime;
+    private CinemaHall cinemaHall;
+    private ShowTime showTime;
     private LocalDateTime now;
 
     @BeforeEach
@@ -58,23 +65,20 @@ class ShowTimeControllerIntegrationTest {
                 .releaseDate(LocalDate.of(2010, 7, 16))
                 .ageRating(AgeRating.AGE_12)
                 .build();
-        movieRepository.save(movie);
 
-        hall = CinemaHall.builder()
+        cinemaHall = CinemaHall.builder()
                 .name("Hall A")
                 .rows(5)
                 .seatsPerRow(10)
                 .build();
-        cinemaHallRepository.save(hall);
 
-        showtime = ShowTime.builder()
+        showTime = ShowTime.builder()
                 .movie(movie)
-                .cinemaHall(hall)
+                .cinemaHall(cinemaHall)
                 .startTime(now.plusHours(1))
                 .endTime(now.plusHours(3))
                 .price(BigDecimal.TEN)
                 .build();
-        showTimeRepository.save(showtime);
     }
 
 
@@ -85,13 +89,28 @@ class ShowTimeControllerIntegrationTest {
     @Test
     @DisplayName("should return empty list when no showtimes exist")
     void shouldReturnEmptyListWhenNoShowTimesExist() throws Exception {
-        // TODO: clear DB, perform GET, assert empty JSON array
+        //given - empty db
+        //when
+        mockMvc.perform(get("/api/showtimes"))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
     }
 
     @Test
     @DisplayName("should return list of showtimes when they exist")
     void shouldReturnListOfShowTimes() throws Exception {
-        // TODO: perform GET, assert fields
+        //given
+        movieRepository.save(movie);
+        cinemaHallRepository.save(cinemaHall);
+        showTimeRepository.save(showTime);
+        //when
+        mockMvc.perform(get("/api/showtimes"))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].movieTitle").value("Inception"))
+                .andExpect(jsonPath("$[0].cinemaHallName").value("Hall A"))
+                .andExpect(jsonPath("$[0].price").value(10));
     }
 
 
@@ -102,13 +121,27 @@ class ShowTimeControllerIntegrationTest {
     @Test
     @DisplayName("should return showtime when found by id")
     void shouldReturnShowTimeById() throws Exception {
-        // TODO: perform GET with saved id
+        //given
+        movieRepository.save(movie);
+        cinemaHallRepository.save(cinemaHall);
+        long showTimeId = showTimeRepository.save(showTime).getId();
+        //when
+        mockMvc.perform(get("/api/showtimes/" + showTimeId))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.movieTitle").value("Inception"))
+                .andExpect(jsonPath("$.cinemaHallName").value("Hall A"))
+                .andExpect(jsonPath("$.price").value(10));
     }
 
     @Test
     @DisplayName("should return 404 when showtime not found by id")
     void shouldReturn404WhenShowTimeNotFound() throws Exception {
-        // TODO: GET nonexistent id, assert 404 + response body
+        //given - empty db
+        //when
+        mockMvc.perform(get("/api/showtimes/999"))
+                //then
+                .andExpect(status().isNotFound());
     }
 
 
@@ -119,7 +152,17 @@ class ShowTimeControllerIntegrationTest {
     @Test
     @DisplayName("should return showtimes by movie id")
     void shouldReturnShowTimesByMovie() throws Exception {
-        // TODO
+        //given
+        long movieId = movieRepository.save(movie).getId();
+        cinemaHallRepository.save(cinemaHall);
+        showTimeRepository.save(showTime);
+        //when
+        mockMvc.perform(get("/api/showtimes/movie/" + movieId))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].movieTitle").value("Inception"))
+                .andExpect(jsonPath("$[0].cinemaHallName").value("Hall A"))
+                .andExpect(jsonPath("$[0].price").value(10));
     }
 
 
@@ -130,7 +173,17 @@ class ShowTimeControllerIntegrationTest {
     @Test
     @DisplayName("should return showtimes by hall id")
     void shouldReturnShowTimesByHall() throws Exception {
-        // TODO
+        //given
+        movieRepository.save(movie);
+        long cinemaHallId = cinemaHallRepository.save(cinemaHall).getId();
+        showTimeRepository.save(showTime);
+        //when
+        mockMvc.perform(get("/api/showtimes/hall/" + cinemaHallId))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].movieTitle").value("Inception"))
+                .andExpect(jsonPath("$[0].cinemaHallName").value("Hall A"))
+                .andExpect(jsonPath("$[0].price").value(10));
     }
 
 
@@ -141,7 +194,17 @@ class ShowTimeControllerIntegrationTest {
     @Test
     @DisplayName("should return showtimes by date")
     void shouldReturnShowTimesByDate() throws Exception {
-        // TODO
+        //given
+        movieRepository.save(movie);
+        cinemaHallRepository.save(cinemaHall);
+        showTimeRepository.save(showTime);
+        //when
+        mockMvc.perform(get("/api/showtimes/date/" + now.toLocalDate().format(DateTimeFormatter.ISO_DATE)))
+                //then
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].movieTitle").value("Inception"))
+                .andExpect(jsonPath("$[0].cinemaHallName").value("Hall A"))
+                .andExpect(jsonPath("$[0].price").value(10));
     }
 
 
@@ -152,25 +215,86 @@ class ShowTimeControllerIntegrationTest {
     @Test
     @DisplayName("should create showtime when valid data")
     void shouldCreateShowTime() throws Exception {
-        // TODO: build CreateShowTimeRequest, POST, assert created
+        //given
+        long movieId = movieRepository.save(movie).getId();
+        long cinemaHallId = cinemaHallRepository.save(cinemaHall).getId();
+        CreateShowTimeRequest createShowTimeRequest = CreateShowTimeRequest.builder()
+                .movieId(movieId)
+                .cinemaHallId(cinemaHallId)
+                .startTime(now.plusHours(1))
+                .endTime(now.plusHours(3))
+                .price(BigDecimal.TEN)
+                .build();
+        String json = objectMapper.writeValueAsString(createShowTimeRequest);
+        //when
+        mockMvc.perform(post("/api/showtimes").content(json).contentType(MediaType.APPLICATION_JSON))
+                //then
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.movieTitle").value("Inception"))
+                .andExpect(jsonPath("$.cinemaHallName").value("Hall A"))
+                .andExpect(jsonPath("$.price").value(10));
     }
 
     @Test
     @DisplayName("should return 400 when request invalid")
     void shouldReturn400WhenInvalidCreateRequest() throws Exception {
-        // TODO: invalid CreateShowTimeRequest (past date, negative price)
+        //given
+        long movieId = movieRepository.save(movie).getId();
+        long cinemaHallId = cinemaHallRepository.save(cinemaHall).getId();
+        CreateShowTimeRequest createShowTimeRequest = CreateShowTimeRequest.builder()
+                .movieId(movieId)
+                .cinemaHallId(cinemaHallId)
+                .startTime(now.minusHours(1))
+                .endTime(now.plusHours(3))
+                .price(BigDecimal.valueOf(-5))
+                .build();
+        String json = objectMapper.writeValueAsString(createShowTimeRequest);
+        //when
+        mockMvc.perform(post("/api/showtimes").content(json).contentType(MediaType.APPLICATION_JSON))
+                //then
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("should return 400 when endTime before startTime (validation)")
     void shouldReturn400ForInvalidTimeRange() throws Exception {
-        // TODO
+        //given
+        long movieId = movieRepository.save(movie).getId();
+        long cinemaHallId = cinemaHallRepository.save(cinemaHall).getId();
+        CreateShowTimeRequest createShowTimeRequest = CreateShowTimeRequest.builder()
+                .movieId(movieId)
+                .cinemaHallId(cinemaHallId)
+                .startTime(now.plusHours(3))
+                .endTime(now.plusHours(1))
+                .price(BigDecimal.TEN)
+                .build();
+        String json = objectMapper.writeValueAsString(createShowTimeRequest);
+        //when
+        mockMvc.perform(post("/api/showtimes").content(json).contentType(MediaType.APPLICATION_JSON))
+                //then
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("should return 409 when showtime conflicts with existing")
     void shouldReturn409ForTimeConflict() throws Exception {
-        // TODO: create second showtime overlapping with existing
+        // given
+        long movieId = movieRepository.save(movie).getId();
+        long cinemaHallId = cinemaHallRepository.save(cinemaHall).getId();
+        showTimeRepository.save(showTime);
+
+        CreateShowTimeRequest createShowTimeRequest = CreateShowTimeRequest.builder()
+                .movieId(movieId)
+                .cinemaHallId(cinemaHallId)
+                .startTime(now.plusHours(2))
+                .endTime(now.plusHours(3))
+                .price(BigDecimal.TEN)
+                .build();
+        String json = objectMapper.writeValueAsString(createShowTimeRequest);
+        //when
+        mockMvc.perform(post("/api/showtimes").content(json).contentType(MediaType.APPLICATION_JSON))
+                //then
+                .andExpect(status().isConflict());
     }
 
 
