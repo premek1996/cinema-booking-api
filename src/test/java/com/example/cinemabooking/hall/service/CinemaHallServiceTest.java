@@ -33,18 +33,18 @@ class CinemaHallServiceTest {
     @InjectMocks
     private CinemaHallService cinemaHallService;
 
-    private CinemaHall sampleCinemaHall;
+    private CinemaHall cinemaHall;
 
     @BeforeEach
     void setUp() {
-        sampleCinemaHall = TestFixtures.cinemaHallWithId();
+        cinemaHall = TestFixtures.cinemaHallWithId();
     }
 
     @Test
     @DisplayName("should return all cinema halls")
     void shouldReturnAllCinemaHalls() {
         // given
-        given(cinemaHallRepository.findAll()).willReturn(List.of(sampleCinemaHall));
+        given(cinemaHallRepository.findAll()).willReturn(List.of(cinemaHall));
         // when
         List<CinemaHallResponse> cinemaHalls = cinemaHallService.getAllCinemaHalls();
         // then
@@ -60,7 +60,7 @@ class CinemaHallServiceTest {
     @DisplayName("should return cinema hall by id when exists")
     void shouldReturnCinemaHallByIdWhenExists() {
         // given
-        given(cinemaHallRepository.findById(1L)).willReturn(Optional.of(sampleCinemaHall));
+        given(cinemaHallRepository.findById(1L)).willReturn(Optional.of(cinemaHall));
         // when
         CinemaHallResponse cinemaHallResponse = cinemaHallService.getCinemaHallById(1L);
         // then
@@ -88,18 +88,18 @@ class CinemaHallServiceTest {
     void shouldCreateCinemaHallWhenNameNotExists() {
         // given
         CreateCinemaHallRequest createCinemaHallRequest = mock(CreateCinemaHallRequest.class);
-        given(createCinemaHallRequest.toCinemaHall()).willReturn(sampleCinemaHall);
-        given(cinemaHallRepository.findByName(sampleCinemaHall.getName())).willReturn(Optional.empty());
-        given(cinemaHallRepository.save(sampleCinemaHall)).willReturn(sampleCinemaHall);
+        given(createCinemaHallRequest.toCinemaHall()).willReturn(cinemaHall);
+        given(cinemaHallRepository.findByName(cinemaHall.getName())).willReturn(Optional.empty());
+        given(cinemaHallRepository.save(cinemaHall)).willReturn(cinemaHall);
         // when
         CinemaHallResponse cinemaHallResponse = cinemaHallService.createCinemaHall(createCinemaHallRequest);
         // then
         assertThat(cinemaHallResponse)
                 .extracting(CinemaHallResponse::getName, CinemaHallResponse::getRows, CinemaHallResponse::getSeatsPerRow)
                 .containsExactly("Hall A", 5, 10);
-        assertThat(cinemaHallResponse.getSeats()).hasSize(sampleCinemaHall.getRows() * sampleCinemaHall.getSeatsPerRow());
-        verify(cinemaHallRepository).findByName(sampleCinemaHall.getName());
-        verify(cinemaHallRepository).save(sampleCinemaHall);
+        assertThat(cinemaHallResponse.getSeats()).hasSize(cinemaHall.getRows() * cinemaHall.getSeatsPerRow());
+        verify(cinemaHallRepository).findByName(cinemaHall.getName());
+        verify(cinemaHallRepository).save(cinemaHall);
         verifyNoMoreInteractions(cinemaHallRepository);
     }
 
@@ -108,12 +108,12 @@ class CinemaHallServiceTest {
     void shouldThrowExceptionWhenCreatingCinemaHallWithDuplicateName() {
         // given
         CreateCinemaHallRequest createCinemaHallRequest = mock(CreateCinemaHallRequest.class);
-        given(createCinemaHallRequest.toCinemaHall()).willReturn(sampleCinemaHall);
-        given(cinemaHallRepository.findByName(sampleCinemaHall.getName())).willReturn(Optional.of(sampleCinemaHall));
+        given(createCinemaHallRequest.toCinemaHall()).willReturn(cinemaHall);
+        given(cinemaHallRepository.findByName(cinemaHall.getName())).willReturn(Optional.of(cinemaHall));
         // when + then
         assertThatThrownBy(() -> cinemaHallService.createCinemaHall(createCinemaHallRequest))
                 .isInstanceOf(CinemaHallAlreadyExistsException.class);
-        verify(cinemaHallRepository).findByName(sampleCinemaHall.getName());
+        verify(cinemaHallRepository).findByName(cinemaHall.getName());
         verifyNoMoreInteractions(cinemaHallRepository);
     }
 
@@ -126,7 +126,7 @@ class CinemaHallServiceTest {
                 .rows(15)
                 .seatsPerRow(8)
                 .build();
-        given(cinemaHallRepository.findById(1L)).willReturn(Optional.of(sampleCinemaHall));
+        given(cinemaHallRepository.findById(1L)).willReturn(Optional.of(cinemaHall));
         given(cinemaHallRepository.findByName(updateCinemaHallRequest.getName())).willReturn(Optional.empty());
         // when
         CinemaHallResponse cinemaHallResponse = cinemaHallService.updateCinemaHall(1L, updateCinemaHallRequest);
@@ -158,7 +158,7 @@ class CinemaHallServiceTest {
     void shouldThrowExceptionWhenUpdatingCinemaHallWithDuplicateName() {
         // given
         UpdateCinemaHallRequest updateCinemaHallRequest = mock(UpdateCinemaHallRequest.class);
-        given(cinemaHallRepository.findById(1L)).willReturn(Optional.of(sampleCinemaHall));
+        given(cinemaHallRepository.findById(1L)).willReturn(Optional.of(cinemaHall));
         given(updateCinemaHallRequest.getName()).willReturn("Duplicate name");
         CinemaHall cinemaHallWithDuplicateName = new CinemaHall();
         cinemaHallWithDuplicateName.setId(3L);
@@ -179,12 +179,12 @@ class CinemaHallServiceTest {
     @DisplayName("should delete cinema hall when exists")
     void shouldDeleteCinemaHallWhenExists() {
         // given
-        given(cinemaHallRepository.findById(1L)).willReturn(Optional.of(sampleCinemaHall));
+        given(cinemaHallRepository.findById(1L)).willReturn(Optional.of(cinemaHall));
         // when
         cinemaHallService.deleteCinemaHall(1L);
         // then
         verify(cinemaHallRepository).findById(1L);
-        verify(cinemaHallRepository).delete(sampleCinemaHall);
+        verify(cinemaHallRepository).delete(cinemaHall);
         verifyNoMoreInteractions(cinemaHallRepository);
     }
 
