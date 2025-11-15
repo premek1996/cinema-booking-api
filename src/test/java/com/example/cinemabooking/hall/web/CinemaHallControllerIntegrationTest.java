@@ -1,5 +1,6 @@
 package com.example.cinemabooking.hall.web;
 
+import com.example.cinemabooking.TestFixtures;
 import com.example.cinemabooking.hall.dto.CreateCinemaHallRequest;
 import com.example.cinemabooking.hall.dto.UpdateCinemaHallRequest;
 import com.example.cinemabooking.hall.entity.CinemaHall;
@@ -33,15 +34,11 @@ class CinemaHallControllerIntegrationTest {
     @Autowired
     private CinemaHallRepository cinemaHallRepository;
 
-    private CinemaHall sampleCinemaHall;
+    private CinemaHall cinemaHall;
 
     @BeforeEach
     void setUp() {
-        sampleCinemaHall = CinemaHall.builder()
-                .name("Hall A")
-                .rows(5)
-                .seatsPerRow(10)
-                .build();
+        cinemaHall = TestFixtures.cinemaHall();
     }
 
     // --------------------------------------------------
@@ -63,7 +60,7 @@ class CinemaHallControllerIntegrationTest {
     @DisplayName("should return list of cinema halls when halls exist")
     void shouldReturnListOfCinemaHallsWhenExists() throws Exception {
         // given
-        cinemaHallRepository.save(sampleCinemaHall);
+        cinemaHallRepository.save(cinemaHall);
         // when
         mockMvc.perform(get("/api/halls"))
                 // then
@@ -81,7 +78,7 @@ class CinemaHallControllerIntegrationTest {
     @DisplayName("should return cinema hall when found by id")
     void shouldReturnCinemaHallById() throws Exception {
         // given
-        CinemaHall saved = cinemaHallRepository.save(sampleCinemaHall);
+        CinemaHall saved = cinemaHallRepository.save(cinemaHall);
         // when
         mockMvc.perform(get("/api/halls/" + saved.getId()))
                 // then
@@ -151,9 +148,9 @@ class CinemaHallControllerIntegrationTest {
     @DisplayName("should return 409 when cinema hall with same name exists")
     void shouldReturn409WhenCinemaHallWithSameNameExists() throws Exception {
         // given
-        cinemaHallRepository.save(sampleCinemaHall);
+        cinemaHallRepository.save(cinemaHall);
         CreateCinemaHallRequest request = CreateCinemaHallRequest.builder()
-                .name(sampleCinemaHall.getName())
+                .name(cinemaHall.getName())
                 .rows(10)
                 .seatsPerRow(5)
                 .build();
@@ -175,7 +172,7 @@ class CinemaHallControllerIntegrationTest {
     @DisplayName("should update cinema hall when exists and valid data")
     void shouldUpdateCinemaHallWhenExistsAndValidData() throws Exception {
         // given
-        CinemaHall saved = cinemaHallRepository.save(sampleCinemaHall);
+        CinemaHall saved = cinemaHallRepository.save(cinemaHall);
         UpdateCinemaHallRequest request = UpdateCinemaHallRequest.builder()
                 .name("Updated Hall")
                 .rows(10)
@@ -214,13 +211,14 @@ class CinemaHallControllerIntegrationTest {
     @DisplayName("should return 409 when updating cinema hall to duplicate name")
     void shouldReturn409WhenUpdatingCinemaHallToDuplicateName() throws Exception {
         // given
-        CinemaHall cinemaHallWitDuplicatedName = CinemaHall.builder()
-                .name("Hall B")
-                .rows(5)
-                .seatsPerRow(10)
-                .build();
+        CinemaHall cinemaHallWitDuplicatedName = new CinemaHall();
+        cinemaHallWitDuplicatedName.setName("Hall B");
+        cinemaHallWitDuplicatedName.setRows(5);
+        cinemaHallWitDuplicatedName.setSeatsPerRow(10);
+
+
         cinemaHallRepository.save(cinemaHallWitDuplicatedName);
-        CinemaHall saved = cinemaHallRepository.save(sampleCinemaHall);
+        CinemaHall saved = cinemaHallRepository.save(cinemaHall);
         UpdateCinemaHallRequest request = UpdateCinemaHallRequest.builder()
                 .name(cinemaHallWitDuplicatedName.getName())
                 .rows(10)
@@ -244,7 +242,7 @@ class CinemaHallControllerIntegrationTest {
     @DisplayName("should delete cinema hall when exists")
     void shouldDeleteCinemaHallWhenExists() throws Exception {
         // given
-        CinemaHall saved = cinemaHallRepository.save(sampleCinemaHall);
+        CinemaHall saved = cinemaHallRepository.save(cinemaHall);
         // when
         mockMvc.perform(delete("/api/halls/" + saved.getId()))
                 // then

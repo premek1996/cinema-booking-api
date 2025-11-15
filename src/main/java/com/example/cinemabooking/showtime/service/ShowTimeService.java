@@ -68,6 +68,8 @@ public class ShowTimeService {
         CinemaHall cinemaHall = cinemaHallService.getCinemaHallOrThrow(request.getCinemaHallId());
         validateShowTime(cinemaHall, request.getStartTime(), request.getEndTime(), null);
         ShowTime showTime = request.toShowTime(movie, cinemaHall);
+        cinemaHall.addShowTime(showTime);
+        movie.addShowTime(showTime);
         return ShowTimeResponse.of(showTimeRepository.save(showTime));
     }
 

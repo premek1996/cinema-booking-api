@@ -35,13 +35,13 @@ public class CreateShowTimeRequest {
     BigDecimal price;
 
     public ShowTime toShowTime(Movie movie, CinemaHall cinemaHall) {
-        return ShowTime.builder()
-                .movie(movie)
-                .cinemaHall(cinemaHall)
-                .startTime(startTime)
-                .endTime(endTime)
-                .price(price)
-                .build();
+        ShowTime showTime = new ShowTime();
+        showTime.setMovie(movie);
+        showTime.setCinemaHall(cinemaHall);
+        showTime.setStartTime(startTime);
+        showTime.setEndTime(endTime);
+        showTime.setPrice(price);
+        return showTime;
     }
 
 }

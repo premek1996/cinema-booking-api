@@ -1,5 +1,6 @@
 package com.example.cinemabooking.movie.web;
 
+import com.example.cinemabooking.TestFixtures;
 import com.example.cinemabooking.movie.dto.CreateMovieRequest;
 import com.example.cinemabooking.movie.entity.AgeRating;
 import com.example.cinemabooking.movie.entity.Movie;
@@ -35,18 +36,11 @@ class MovieControllerIntegrationTest {
     @Autowired
     private MovieRepository movieRepository;
 
-    private Movie sampleMovie;
+    private Movie movie;
 
     @BeforeEach
     void setUp() {
-        sampleMovie = Movie.builder()
-                .title("Inception")
-                .description("Dream within a dream")
-                .genre("Sci-Fi")
-                .durationMinutes(148)
-                .releaseDate(LocalDate.of(2010, 7, 16))
-                .ageRating(AgeRating.AGE_12)
-                .build();
+        movie = TestFixtures.movie();
     }
 
     // ----------------------------------------
@@ -68,7 +62,7 @@ class MovieControllerIntegrationTest {
     @DisplayName("should return list of movies when movies exist")
     void shouldReturnListOfMovies() throws Exception {
         // given
-        movieRepository.save(sampleMovie);
+        movieRepository.save(movie);
         // when
         mockMvc.perform(get("/api/movies"))
                 //then
@@ -85,7 +79,7 @@ class MovieControllerIntegrationTest {
     @DisplayName("should return movie when found by id")
     void shouldReturnMovieById() throws Exception {
         // given
-        Movie saved = movieRepository.save(sampleMovie);
+        Movie saved = movieRepository.save(movie);
         //when
         mockMvc.perform(get("/api/movies/" + saved.getId()))
                 //then
@@ -163,7 +157,7 @@ class MovieControllerIntegrationTest {
     @DisplayName("should return 409 when movie with same title exists")
     void shouldReturn409WhenMovieAlreadyExists() throws Exception {
         //given
-        movieRepository.save(sampleMovie);
+        movieRepository.save(movie);
         CreateMovieRequest createMovieRequest = CreateMovieRequest.builder()
                 .title("Inception")
                 .description("Duplicate")
@@ -193,12 +187,12 @@ class MovieControllerIntegrationTest {
     @DisplayName("should delete movie when exists")
     void shouldDeleteMovieWhenExists() throws Exception {
         //given
-        Movie saved = movieRepository.save(sampleMovie);
+        Movie saved = movieRepository.save(movie);
         //when
         mockMvc.perform(delete("/api/movies/" + saved.getId()))
                 //then
                 .andExpect(status().isNoContent());
-        assertThat(movieRepository.findByTitle(sampleMovie.getTitle())).isEmpty();
+        assertThat(movieRepository.findByTitle(movie.getTitle())).isEmpty();
     }
 
     @Test

@@ -2,19 +2,16 @@ package com.example.cinemabooking.user;
 
 import com.example.cinemabooking.reservation.Reservation;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@ToString(exclude = "reservations")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
 
@@ -36,11 +33,9 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    @Builder.Default
-    private boolean enabled = true;
+    private boolean enabled;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Reservation> reservations = new ArrayList<>();
+    private List<Reservation> reservations;
 
 }

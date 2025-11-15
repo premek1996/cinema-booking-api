@@ -2,7 +2,9 @@ package com.example.cinemabooking.movie.entity;
 
 import com.example.cinemabooking.showtime.entity.ShowTime;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -12,10 +14,6 @@ import java.util.List;
 @Table(name = "movies")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@ToString(exclude = {"showTimes"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Movie {
 
@@ -44,7 +42,14 @@ public class Movie {
     private AgeRating ageRating;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<ShowTime> showTimes = new ArrayList<>();
+    private List<ShowTime> showTimes;
+
+    public void addShowTime(ShowTime showTime) {
+        if (showTimes == null) {
+            showTimes = new ArrayList<>();
+        }
+        showTimes.add(showTime);
+        showTime.setMovie(this);
+    }
 
 }

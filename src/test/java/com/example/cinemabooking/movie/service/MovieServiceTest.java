@@ -1,8 +1,8 @@
 package com.example.cinemabooking.movie.service;
 
+import com.example.cinemabooking.TestFixtures;
 import com.example.cinemabooking.movie.dto.CreateMovieRequest;
 import com.example.cinemabooking.movie.dto.MovieResponse;
-import com.example.cinemabooking.movie.entity.AgeRating;
 import com.example.cinemabooking.movie.entity.Movie;
 import com.example.cinemabooking.movie.repository.MovieRepository;
 import com.example.cinemabooking.movie.service.exception.MovieAlreadyExistsException;
@@ -15,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,26 +32,18 @@ class MovieServiceTest {
     @InjectMocks
     private MovieService movieService;
 
-    private Movie sampleMovie;
+    private Movie movie;
 
     @BeforeEach
     void setUp() {
-        sampleMovie = Movie.builder()
-                .id(1L)
-                .title("Inception")
-                .genre("Sci-Fi")
-                .durationMinutes(148)
-                .description("Dream within a dream")
-                .ageRating(AgeRating.AGE_12)
-                .releaseDate(LocalDate.of(2005, 10, 12))
-                .build();
+        movie = TestFixtures.movieWithId();
     }
 
     @Test
     @DisplayName("should return list of movies when getAllMovies() is called")
     void shouldReturnAllMovies() {
         //given
-        given(movieRepository.findAll()).willReturn(List.of(sampleMovie));
+        given(movieRepository.findAll()).willReturn(List.of(movie));
         //when
         List<MovieResponse> result = movieService.getAllMovies();
         //then
@@ -79,7 +70,7 @@ class MovieServiceTest {
     @DisplayName("should return movie when found by id")
     void shouldReturnMovieById() {
         //given
-        given(movieRepository.findById(1L)).willReturn(Optional.of(sampleMovie));
+        given(movieRepository.findById(1L)).willReturn(Optional.of(movie));
         //when
         MovieResponse result = movieService.getMovieById(1L);
         //then
@@ -105,16 +96,16 @@ class MovieServiceTest {
     void shouldSaveNewMovie() {
         // given
         CreateMovieRequest createMovieRequest = mock(CreateMovieRequest.class);
-        given(createMovieRequest.getTitle()).willReturn(sampleMovie.getTitle());
-        given(movieRepository.findByTitle(sampleMovie.getTitle())).willReturn(Optional.empty());
-        given(createMovieRequest.toMovie()).willReturn(sampleMovie);
-        given(movieRepository.save(sampleMovie)).willReturn(sampleMovie);
+        given(createMovieRequest.getTitle()).willReturn(movie.getTitle());
+        given(movieRepository.findByTitle(movie.getTitle())).willReturn(Optional.empty());
+        given(createMovieRequest.toMovie()).willReturn(movie);
+        given(movieRepository.save(movie)).willReturn(movie);
         // when
         MovieResponse result = movieService.createMovie(createMovieRequest);
         // then
-        assertThat(result.getTitle()).isEqualTo(sampleMovie.getTitle());
-        verify(movieRepository).findByTitle(sampleMovie.getTitle());
-        verify(movieRepository).save(sampleMovie);
+        assertThat(result.getTitle()).isEqualTo(movie.getTitle());
+        verify(movieRepository).findByTitle(movie.getTitle());
+        verify(movieRepository).save(movie);
         verifyNoMoreInteractions(movieRepository);
     }
 
@@ -123,12 +114,12 @@ class MovieServiceTest {
     void shouldThrowExceptionWhenMovieAlreadyExists() {
         // given
         CreateMovieRequest createMovieRequest = mock(CreateMovieRequest.class);
-        given(createMovieRequest.getTitle()).willReturn(sampleMovie.getTitle());
-        given(movieRepository.findByTitle(sampleMovie.getTitle())).willReturn(Optional.of(sampleMovie));
+        given(createMovieRequest.getTitle()).willReturn(movie.getTitle());
+        given(movieRepository.findByTitle(movie.getTitle())).willReturn(Optional.of(movie));
         // when + then
         assertThatThrownBy(() -> movieService.createMovie(createMovieRequest))
                 .isInstanceOf(MovieAlreadyExistsException.class);
-        verify(movieRepository).findByTitle(sampleMovie.getTitle());
+        verify(movieRepository).findByTitle(movie.getTitle());
         verifyNoMoreInteractions(movieRepository);
     }
 
@@ -136,12 +127,12 @@ class MovieServiceTest {
     @DisplayName("should delete movie when exists")
     void shouldDeleteMovie() {
         // given
-        given(movieRepository.findById(1L)).willReturn(Optional.of(sampleMovie));
+        given(movieRepository.findById(1L)).willReturn(Optional.of(movie));
         // when
         movieService.deleteMovie(1L);
         // then
         verify(movieRepository).findById(1L);
-        verify(movieRepository).delete(sampleMovie);
+        verify(movieRepository).delete(movie);
         verifyNoMoreInteractions(movieRepository);
     }
 

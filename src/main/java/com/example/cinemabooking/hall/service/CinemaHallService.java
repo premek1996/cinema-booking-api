@@ -53,10 +53,9 @@ public class CinemaHallService {
     private void createSeats(CinemaHall cinemaHall) {
         for (int row = 1; row <= cinemaHall.getRows(); row++) {
             for (int seatNumber = 1; seatNumber <= cinemaHall.getSeatsPerRow(); seatNumber++) {
-                Seat seat = Seat.builder()
-                        .rowNumber(row)
-                        .seatNumber(seatNumber)
-                        .build();
+                Seat seat = new Seat();
+                seat.setRowNumber(row);
+                seat.setSeatNumber(seatNumber);
                 cinemaHall.addSeat(seat);
             }
         }
@@ -82,7 +81,7 @@ public class CinemaHallService {
         cinemaHall.setName(request.getName());
         cinemaHall.setRows(request.getRows());
         cinemaHall.setSeatsPerRow(request.getSeatsPerRow());
-        cinemaHall.getSeats().clear();
+        cinemaHall.clearSeats();
         createSeats(cinemaHall);
     }
 

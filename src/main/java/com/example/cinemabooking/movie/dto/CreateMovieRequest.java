@@ -35,14 +35,14 @@ public class CreateMovieRequest {
     AgeRating ageRating;
 
     public Movie toMovie() {
-        return Movie.builder()
-                .title(title)
-                .description(description)
-                .genre(genre)
-                .durationMinutes(durationMinutes)
-                .releaseDate(releaseDate)
-                .ageRating(ageRating)
-                .build();
+        Movie movie = new Movie();
+        movie.setTitle(title);
+        movie.setDescription(description);
+        movie.setGenre(genre);
+        movie.setDurationMinutes(durationMinutes);
+        movie.setReleaseDate(releaseDate);
+        movie.setAgeRating(ageRating);
+        return movie;
     }
 
 }

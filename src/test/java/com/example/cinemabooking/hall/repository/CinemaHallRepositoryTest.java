@@ -1,5 +1,6 @@
 package com.example.cinemabooking.hall.repository;
 
+import com.example.cinemabooking.TestFixtures;
 import com.example.cinemabooking.hall.entity.CinemaHall;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,24 +18,20 @@ class CinemaHallRepositoryTest {
     @Autowired
     private CinemaHallRepository cinemaHallRepository;
 
-    private CinemaHall sampleCinemaHall;
+    private CinemaHall cinemaHall;
 
     @BeforeEach
     void setUp() {
-        sampleCinemaHall = CinemaHall.builder()
-                .name("Hall A")
-                .rows(5)
-                .seatsPerRow(10)
-                .build();
+        cinemaHall = TestFixtures.cinemaHall();
     }
 
     @Test
     @DisplayName("should find cinema hall by name")
     void shouldFindCinemaHallByName() {
         // given
-        cinemaHallRepository.save(sampleCinemaHall);
+        cinemaHallRepository.save(cinemaHall);
         // when
-        Optional<CinemaHall> result = cinemaHallRepository.findByName(sampleCinemaHall.getName());
+        Optional<CinemaHall> result = cinemaHallRepository.findByName(cinemaHall.getName());
         // then
         assertThat(result).isPresent();
         assertThat(result.get().getRows()).isEqualTo(5);
@@ -45,7 +42,7 @@ class CinemaHallRepositoryTest {
     @DisplayName("should return empty when hall not found by name")
     void shouldReturnEmptyWhenNotFound() {
         // given
-        cinemaHallRepository.save(sampleCinemaHall);
+        cinemaHallRepository.save(cinemaHall);
         // when
         Optional<CinemaHall> result = cinemaHallRepository.findByName("Hall B");
         // then

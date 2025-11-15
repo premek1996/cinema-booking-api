@@ -1,5 +1,6 @@
 package com.example.cinemabooking.hall.service;
 
+import com.example.cinemabooking.TestFixtures;
 import com.example.cinemabooking.hall.dto.CinemaHallResponse;
 import com.example.cinemabooking.hall.dto.CreateCinemaHallRequest;
 import com.example.cinemabooking.hall.dto.UpdateCinemaHallRequest;
@@ -36,12 +37,7 @@ class CinemaHallServiceTest {
 
     @BeforeEach
     void setUp() {
-        sampleCinemaHall = CinemaHall.builder()
-                .id(1L)
-                .name("Hall A")
-                .rows(5)
-                .seatsPerRow(10)
-                .build();
+        sampleCinemaHall = TestFixtures.cinemaHallWithId();
     }
 
     @Test
@@ -164,12 +160,12 @@ class CinemaHallServiceTest {
         UpdateCinemaHallRequest updateCinemaHallRequest = mock(UpdateCinemaHallRequest.class);
         given(cinemaHallRepository.findById(1L)).willReturn(Optional.of(sampleCinemaHall));
         given(updateCinemaHallRequest.getName()).willReturn("Duplicate name");
-        CinemaHall cinemaHallWithDuplicateName = CinemaHall.builder()
-                .id(3L)
-                .name("Duplicate name")
-                .rows(2)
-                .seatsPerRow(8)
-                .build();
+        CinemaHall cinemaHallWithDuplicateName = new CinemaHall();
+        cinemaHallWithDuplicateName.setId(3L);
+        cinemaHallWithDuplicateName.setName("Duplicate name");
+        cinemaHallWithDuplicateName.setRows(2);
+        cinemaHallWithDuplicateName.setSeatsPerRow(8);
+
         given(cinemaHallRepository.findByName("Duplicate name")).willReturn(Optional.of(cinemaHallWithDuplicateName));
         // when + then
         assertThatThrownBy(() -> cinemaHallService.updateCinemaHall(1L, updateCinemaHallRequest))

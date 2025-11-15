@@ -3,20 +3,17 @@ package com.example.cinemabooking.reservation;
 import com.example.cinemabooking.showtime.entity.ShowTime;
 import com.example.cinemabooking.user.User;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "reservations")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@ToString(exclude = {"user", "showTime", "reservedSeats"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Reservation {
 
@@ -33,16 +30,13 @@ public class Reservation {
     private ShowTime showTime;
 
     @Column(nullable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Builder.Default
-    private ReservationStatus status = ReservationStatus.ACTIVE;
+    private ReservationStatus status;
 
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<ReservedSeat> reservedSeats = new ArrayList<>();
+    private List<ReservedSeat> reservedSeats;
 
 }

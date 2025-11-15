@@ -17,17 +17,20 @@ public class CinemaHallResponse {
     List<SeatResponse> seats;
 
     public static CinemaHallResponse of(CinemaHall cinemaHall) {
-        List<SeatResponse> seatsResponse = cinemaHall.getSeats()
-                .stream()
-                .map(SeatResponse::of)
-                .toList();
         return CinemaHallResponse.builder()
                 .id(cinemaHall.getId())
                 .name(cinemaHall.getName())
                 .rows(cinemaHall.getRows())
                 .seatsPerRow(cinemaHall.getSeatsPerRow())
-                .seats(seatsResponse)
+                .seats(getSeatsResponse(cinemaHall))
                 .build();
+    }
+
+    private static List<SeatResponse> getSeatsResponse(CinemaHall cinemaHall) {
+        return cinemaHall.getSeats()
+                .stream()
+                .map(SeatResponse::of)
+                .toList();
     }
 
 }

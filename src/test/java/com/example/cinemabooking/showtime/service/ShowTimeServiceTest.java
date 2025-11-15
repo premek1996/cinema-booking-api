@@ -1,8 +1,8 @@
 package com.example.cinemabooking.showtime.service;
 
+import com.example.cinemabooking.TestFixtures;
 import com.example.cinemabooking.hall.entity.CinemaHall;
 import com.example.cinemabooking.hall.service.CinemaHallService;
-import com.example.cinemabooking.movie.entity.AgeRating;
 import com.example.cinemabooking.movie.entity.Movie;
 import com.example.cinemabooking.movie.service.MovieService;
 import com.example.cinemabooking.showtime.dto.CreateShowTimeRequest;
@@ -49,40 +49,17 @@ class ShowTimeServiceTest {
     @InjectMocks
     private ShowTimeService showTimeService;
 
-    private Movie sampleMovie;
-    private CinemaHall sampleHall;
-    private ShowTime sampleShowTime;
+    private Movie movie;
+    private CinemaHall cinemaHall;
+    private ShowTime showTime;
     private LocalDateTime now;
 
     @BeforeEach
     void setUp() {
         now = LocalDateTime.now();
-
-        sampleMovie = Movie.builder()
-                .id(1L)
-                .title("Inception")
-                .genre("Sci-Fi")
-                .durationMinutes(148)
-                .description("Dream within a dream")
-                .ageRating(AgeRating.AGE_12)
-                .releaseDate(LocalDate.of(2005, 10, 12))
-                .build();
-
-        sampleHall = CinemaHall.builder()
-                .id(1L)
-                .name("Hall A")
-                .rows(5)
-                .seatsPerRow(10)
-                .build();
-
-        sampleShowTime = ShowTime.builder()
-                .id(100L)
-                .movie(sampleMovie)
-                .cinemaHall(sampleHall)
-                .startTime(now.plusHours(1))
-                .endTime(now.plusHours(3))
-                .price(BigDecimal.TEN)
-                .build();
+        movie = TestFixtures.movie();
+        cinemaHall = TestFixtures.cinemaHallWithId();
+        showTime = TestFixtures.showTime(now, movie, cinemaHall);
     }
 
     // ===========================================================
@@ -93,7 +70,7 @@ class ShowTimeServiceTest {
     @DisplayName("should return list of showtimes when getAllShowTimes() is called")
     void shouldReturnAllShowTimes() {
         // given
-        given(showTimeRepository.findAll()).willReturn(List.of(sampleShowTime));
+        given(showTimeRepository.findAll()).willReturn(List.of(showTime));
         // when
         List<ShowTimeResponse> result = showTimeService.getAllShowTimes();
         // then
@@ -124,7 +101,7 @@ class ShowTimeServiceTest {
     @DisplayName("should return showtime when found by id")
     void shouldReturnShowTimeById() {
         // given
-        given(showTimeRepository.findById(100L)).willReturn(Optional.of(sampleShowTime));
+        given(showTimeRepository.findById(100L)).willReturn(Optional.of(showTime));
         // when
         ShowTimeResponse result = showTimeService.getShowTimeById(100L);
         // then
@@ -153,7 +130,7 @@ class ShowTimeServiceTest {
     @DisplayName("should return showtimes for given movie id")
     void shouldReturnShowTimesByMovie() {
         // given
-        given(showTimeRepository.findByMovieId(1L)).willReturn(List.of(sampleShowTime));
+        given(showTimeRepository.findByMovieId(1L)).willReturn(List.of(showTime));
         //when
         List<ShowTimeResponse> result = showTimeService.getShowTimesByMovie(1L);
         // then
@@ -171,7 +148,7 @@ class ShowTimeServiceTest {
     @DisplayName("should return showtimes for given hall id")
     void shouldReturnShowTimesByHall() {
         // given
-        given(showTimeRepository.findByCinemaHallId(1L)).willReturn(List.of(sampleShowTime));
+        given(showTimeRepository.findByCinemaHallId(1L)).willReturn(List.of(showTime));
         //when
         List<ShowTimeResponse> result = showTimeService.getShowTimesByCinemaHall(1L);
         // then
@@ -189,7 +166,7 @@ class ShowTimeServiceTest {
     @DisplayName("should return showtimes for given date")
     void shouldReturnShowTimesByDate() {
         // given
-        given(showTimeRepository.findByStartTimeBetween(any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(List.of(sampleShowTime));
+        given(showTimeRepository.findByStartTimeBetween(any(LocalDateTime.class), any(LocalDateTime.class))).willReturn(List.of(showTime));
         // when
         List<ShowTimeResponse> result = showTimeService.getShowTimesByDate(LocalDate.now());
         // then
@@ -210,13 +187,13 @@ class ShowTimeServiceTest {
         CreateShowTimeRequest createShowTimeRequest = CreateShowTimeRequest.builder()
                 .movieId(1L)
                 .cinemaHallId(1L)
-                .startTime(now.plusHours(1))
-                .endTime(now.plusHours(3))
+                .startTime(now.plusHours(5))
+                .endTime(now.plusHours(8))
                 .price(BigDecimal.TEN)
                 .build();
-        given(movieService.getMovieOrThrow(1L)).willReturn(sampleMovie);
-        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(sampleHall);
-        given(showTimeRepository.save(any(ShowTime.class))).willReturn(sampleShowTime);
+        given(movieService.getMovieOrThrow(1L)).willReturn(movie);
+        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(cinemaHall);
+        given(showTimeRepository.save(any(ShowTime.class))).willReturn(showTime);
         // when
         ShowTimeResponse result = showTimeService.createShowTime(createShowTimeRequest);
         // then
@@ -236,8 +213,8 @@ class ShowTimeServiceTest {
                 .endTime(now.plusHours(2))
                 .price(BigDecimal.TEN)
                 .build();
-        given(movieService.getMovieOrThrow(1L)).willReturn(sampleMovie);
-        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(sampleHall);
+        given(movieService.getMovieOrThrow(1L)).willReturn(movie);
+        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(cinemaHall);
         // when + then
         assertThatThrownBy(() -> showTimeService.createShowTime(createShowTimeRequest))
                 .isInstanceOf(ShowTimeInvalidTimeRangeException.class);
@@ -255,17 +232,10 @@ class ShowTimeServiceTest {
                 .endTime(now.plusHours(3))
                 .price(BigDecimal.TEN)
                 .build();
-        ShowTime conflictingShowTime = ShowTime.builder()
-                .id(99L)
-                .movie(sampleMovie)
-                .cinemaHall(sampleHall)
-                .startTime(now.plusHours(2))
-                .endTime(now.plusHours(3))
-                .price(BigDecimal.TEN)
-                .build();
-        sampleHall.getShowTimes().add(conflictingShowTime);
-        given(movieService.getMovieOrThrow(1L)).willReturn(sampleMovie);
-        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(sampleHall);
+        ShowTime conflictingShowTime = TestFixtures.conflictingShowTime(now, movie, cinemaHall);
+        cinemaHall.addShowTime(conflictingShowTime);
+        given(movieService.getMovieOrThrow(1L)).willReturn(movie);
+        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(cinemaHall);
         // when + then
         assertThatThrownBy(() -> showTimeService.createShowTime(createShowTimeRequest))
                 .isInstanceOf(ShowTimeConflictException.class);
@@ -287,9 +257,9 @@ class ShowTimeServiceTest {
                 .endTime(now.plusHours(4))
                 .price(BigDecimal.TWO)
                 .build();
-        given(showTimeRepository.findById(100L)).willReturn(Optional.of(sampleShowTime));
-        given(movieService.getMovieOrThrow(1L)).willReturn(sampleMovie);
-        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(sampleHall);
+        given(showTimeRepository.findById(100L)).willReturn(Optional.of(showTime));
+        given(movieService.getMovieOrThrow(1L)).willReturn(movie);
+        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(cinemaHall);
         // when
         ShowTimeResponse result = showTimeService.updateShowTime(100L, updateShowTimeRequest);
         // then
@@ -322,9 +292,9 @@ class ShowTimeServiceTest {
                 .endTime(now.plusHours(3))
                 .price(BigDecimal.TWO)
                 .build();
-        given(showTimeRepository.findById(100L)).willReturn(Optional.of(sampleShowTime));
-        given(movieService.getMovieOrThrow(1L)).willReturn(sampleMovie);
-        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(sampleHall);
+        given(showTimeRepository.findById(100L)).willReturn(Optional.of(showTime));
+        given(movieService.getMovieOrThrow(1L)).willReturn(movie);
+        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(cinemaHall);
         // when + then
         assertThatThrownBy(() -> showTimeService.updateShowTime(100L, updateShowTimeRequest))
                 .isInstanceOf(ShowTimeInvalidTimeRangeException.class);
@@ -339,22 +309,15 @@ class ShowTimeServiceTest {
         UpdateShowTimeRequest updateShowTimeRequest = UpdateShowTimeRequest.builder()
                 .movieId(1L)
                 .cinemaHallId(1L)
-                .startTime(now.plusHours(6))
-                .endTime(now.plusHours(8))
+                .startTime(now.plusHours(2))
+                .endTime(now.plusHours(4))
                 .price(BigDecimal.TWO)
                 .build();
-        ShowTime conflictingShowTime = ShowTime.builder()
-                .id(99L)
-                .movie(sampleMovie)
-                .cinemaHall(sampleHall)
-                .startTime(now.plusHours(7))
-                .endTime(now.plusHours(8))
-                .price(BigDecimal.TEN)
-                .build();
-        sampleHall.getShowTimes().add(conflictingShowTime);
-        given(showTimeRepository.findById(100L)).willReturn(Optional.of(sampleShowTime));
-        given(movieService.getMovieOrThrow(1L)).willReturn(sampleMovie);
-        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(sampleHall);
+        ShowTime conflictingShowTime = TestFixtures.conflictingShowTime(now, movie, cinemaHall);
+        cinemaHall.addShowTime(conflictingShowTime);
+        given(showTimeRepository.findById(100L)).willReturn(Optional.of(showTime));
+        given(movieService.getMovieOrThrow(1L)).willReturn(movie);
+        given(cinemaHallService.getCinemaHallOrThrow(1L)).willReturn(cinemaHall);
         // when + then
         assertThatThrownBy(() -> showTimeService.updateShowTime(100L, updateShowTimeRequest))
                 .isInstanceOf(ShowTimeConflictException.class);
@@ -370,12 +333,12 @@ class ShowTimeServiceTest {
     @DisplayName("should delete showtime when exists")
     void shouldDeleteShowTime() {
         // given
-        given(showTimeRepository.findById(100L)).willReturn(Optional.of(sampleShowTime));
+        given(showTimeRepository.findById(100L)).willReturn(Optional.of(showTime));
         // when
         showTimeService.deleteShowTime(100L);
         // then
         verify(showTimeRepository).findById(100L);
-        verify(showTimeRepository).delete(sampleShowTime);
+        verify(showTimeRepository).delete(showTime);
         verifyNoMoreInteractions(showTimeRepository);
     }
 

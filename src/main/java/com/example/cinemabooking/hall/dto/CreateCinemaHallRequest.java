@@ -20,11 +20,11 @@ public class CreateCinemaHallRequest {
     int seatsPerRow;
 
     public CinemaHall toCinemaHall() {
-        return CinemaHall.builder()
-                .name(name)
-                .rows(rows)
-                .seatsPerRow(seatsPerRow)
-                .build();
+        CinemaHall cinemaHall = new CinemaHall();
+        cinemaHall.setName(name);
+        cinemaHall.setRows(rows);
+        cinemaHall.setSeatsPerRow(seatsPerRow);
+        return cinemaHall;
     }
 
 }

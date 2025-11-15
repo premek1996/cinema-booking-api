@@ -4,21 +4,17 @@ import com.example.cinemabooking.hall.entity.CinemaHall;
 import com.example.cinemabooking.movie.entity.Movie;
 import com.example.cinemabooking.reservation.Reservation;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "show_times")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@ToString(exclude = {"movie", "cinemaHall", "reservations"})
 public class ShowTime {
 
     @Id
@@ -43,8 +39,7 @@ public class ShowTime {
     private BigDecimal price;
 
     @OneToMany(mappedBy = "showTime", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<Reservation> reservations = new ArrayList<>();
+    private List<Reservation> reservations;
 
     public boolean overlapsWith(LocalDateTime startTime, LocalDateTime endTime) {
         return this.startTime.isBefore(endTime) && this.endTime.isAfter(startTime);

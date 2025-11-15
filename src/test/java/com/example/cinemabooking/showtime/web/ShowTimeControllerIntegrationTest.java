@@ -1,8 +1,8 @@
 package com.example.cinemabooking.showtime.web;
 
+import com.example.cinemabooking.TestFixtures;
 import com.example.cinemabooking.hall.entity.CinemaHall;
 import com.example.cinemabooking.hall.repository.CinemaHallRepository;
-import com.example.cinemabooking.movie.entity.AgeRating;
 import com.example.cinemabooking.movie.entity.Movie;
 import com.example.cinemabooking.movie.repository.MovieRepository;
 import com.example.cinemabooking.showtime.dto.CreateShowTimeRequest;
@@ -20,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -56,29 +55,9 @@ class ShowTimeControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         now = LocalDateTime.now();
-
-        movie = Movie.builder()
-                .title("Inception")
-                .description("Dreams")
-                .genre("Sci-Fi")
-                .durationMinutes(148)
-                .releaseDate(LocalDate.of(2010, 7, 16))
-                .ageRating(AgeRating.AGE_12)
-                .build();
-
-        cinemaHall = CinemaHall.builder()
-                .name("Hall A")
-                .rows(5)
-                .seatsPerRow(10)
-                .build();
-
-        showTime = ShowTime.builder()
-                .movie(movie)
-                .cinemaHall(cinemaHall)
-                .startTime(now.plusHours(1))
-                .endTime(now.plusHours(3))
-                .price(BigDecimal.TEN)
-                .build();
+        movie = TestFixtures.movie();
+        cinemaHall = TestFixtures.cinemaHall();
+        showTime = TestFixtures.showTimeWithoutId(now, movie, cinemaHall);
     }
 
 
@@ -279,13 +258,18 @@ class ShowTimeControllerIntegrationTest {
     @DisplayName("should return 409 when showtime conflicts with existing")
     void shouldReturn409ForTimeConflict() throws Exception {
         // given
-        long movieId = movieRepository.save(movie).getId();
-        long cinemaHallId = cinemaHallRepository.save(cinemaHall).getId();
+        movie = movieRepository.save(movie);
+        cinemaHall = cinemaHallRepository.save(cinemaHall);
+
+        showTime.setCinemaHall(cinemaHall);
+        showTime.setMovie(movie);
+        cinemaHall.addShowTime(showTime);
+
         showTimeRepository.save(showTime);
 
         CreateShowTimeRequest createShowTimeRequest = CreateShowTimeRequest.builder()
-                .movieId(movieId)
-                .cinemaHallId(cinemaHallId)
+                .movieId(movie.getId())
+                .cinemaHallId(cinemaHall.getId())
                 .startTime(now.plusHours(2))
                 .endTime(now.plusHours(3))
                 .price(BigDecimal.TEN)

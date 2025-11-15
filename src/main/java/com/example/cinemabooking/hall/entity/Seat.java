@@ -2,19 +2,16 @@ package com.example.cinemabooking.hall.entity;
 
 import com.example.cinemabooking.reservation.ReservedSeat;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "seats", uniqueConstraints = @UniqueConstraint(columnNames = {"hall_id", "rowNumber", "seatNumber"}))
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@ToString(exclude = {"cinemaHall", "reservedSeats"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Seat {
 
@@ -33,7 +30,6 @@ public class Seat {
     private CinemaHall cinemaHall;
 
     @OneToMany(mappedBy = "seat", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<ReservedSeat> reservedSeats = new ArrayList<>();
+    private List<ReservedSeat> reservedSeats;
 
 }
